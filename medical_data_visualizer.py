@@ -26,33 +26,48 @@ def draw_cat_plot():
 
     # Draw categorical plots for each of the two subsets of data
     fig, ax = plt.subplots()
-    fig = sns.catplot(data=df_cat, x='variable', y='total', hue='value', kind='bar', col='cardio')
+    cat_plot = sns.catplot(data=df_cat, x='variable', y='total', hue='value', kind='bar', col='cardio')
 
     # Save figure as .png file and return it from the function for testing
+    fig = cat_plot.fig
     fig.savefig('catplot.png')
     return fig
 
 
-# 10
+# Draw and save a heat map based on normalized data
 def draw_heat_map():
-    # 11
-    df_heat = None
+    # Clean the data
+    # Filter out incorrect data in ap_hi, ap_lo, height, and weight
+    df_heat = df[(df['ap_lo'] <= df['ap_hi']) & (df['height'] >= df['height'].quantile(0.025)) & (df['height'] <= df['height'].quantile(0.975)) & (df['weight'] >= df['weight'].quantile(0.025)) & (df['weight'] <= df['weight'].quantile(0.975))]
 
-    # 12
-    corr = None
+    # Calculate correlation matrix for cleaned data
+    corr = df_heat.corr()
 
-    # 13
-    mask = None
+    # Generate mask for the upper triangle of the correlation matrix
+    mask = np.triu(np.ones_like(corr, dtype=bool))
 
+    # Set up matplotlib figure
+    fig, ax = plt.subplots(figsize=(12,9))
 
+    # Plot and style the heatmap with seaborn using the correlation matrix and mask
+    sns.heatmap(
+        ax = ax,
+        data = corr,
+        mask = mask,
+        vmax = .32,
+        vmin = -.16,
+        robust = True,
+        annot = True,
+        fmt = '.1f',
+        linewidth = 0.5,
+        center = 0,
+        cbar_kws = {
+            'shrink': 0.5,
+            'ticks': [-0.08, 0.0, 0.08, 0.16, 0.24]
+            }
+        )
 
-    # 14
-    fig, ax = None
-
-    # 15
-
-
-
-    # 16
+    # Save figure as .png file and return it from the function for testing
+    fig = ax.get_figure()
     fig.savefig('heatmap.png')
     return fig
